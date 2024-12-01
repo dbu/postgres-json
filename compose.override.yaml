@@ -1,0 +1,9 @@
+
+services:
+###> doctrine/doctrine-bundle ###
+  database:
+    ports:
+      - target: 5432
+        published: ${PSQL_PORT:-5432}
+        protocol: tcp
+###< doctrine/doctrine-bundle ###

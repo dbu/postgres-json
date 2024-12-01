@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <!-- To render these slides you need Slippy https://github.com/Seldaek/slippy -->
+
+        <title>Can Postgres cover your NoSQL needs?</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <meta name="author" content="David Buchmann" />
+        <meta name="email" content="david@liip.ch" />
+        <meta name="date" content="2024-12-05" />
+        <meta name="venue" content="SymfonyCon, Vienna, Austria" />
+
+        <!-- Slippy core file and dependencies -->
+        <script type="text/javascript" src="jquery.min.js"></script>
+        <script type="text/javascript" src="jquery.history.js"></script>
+        <script type="text/javascript" src="slippy.js"></script>
+        <!-- Slippy structural styles -->
+        <link type="text/css" rel="stylesheet" href="slippy.css"/>
+        <!-- Slippy theme -->
+        <link type="text/css" rel="stylesheet" href="slippy-pure.css"/>
+        <!-- Syntax highlighting core file  -->
+        <script type="text/javascript" src="highlighter/shCore.js"></script>
+        <!-- Syntax highlighting brushes, remove those you don't need -->
+        <script type="text/javascript" src="highlighter/shBrushPhp.js"></script>
+        <script type="text/javascript" src="highlighter/shBrushDiff.js"></script>
+        <script type="text/javascript" src="highlighter/shBrushPlain.js"></script>
+        <script type="text/javascript" src="highlighter/shBrushXml.js"></script>
+        <script type="text/javascript" src="highlighter/shBrushBash.js"></script>
+        <!-- Syntax highlighting styles-->
+        <link type="text/css" rel="stylesheet" href="highlighter/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="highlighter/shThemeEclipse.css"/>
+
+        <style>
+            @font-face {
+                font-family: 'Merriweather Sans';
+                font-style: normal;
+                font-weight: 400;
+                src: local('Merriweather Sans Regular'), local('MerriweatherSans-Regular'), url(http://fonts.gstatic.com/s/merriweathersans/v5/AKu1CjQ4qnV8MUltkAX3sM2kigAIKUS7C8wDj9A45hI.ttf) format('truetype');
+            }
+
+            @font-face {
+                font-family: 'Merriweather Sans';
+                font-style: normal;
+                font-weight: 800;
+                src: local('Merriweather Sans ExtraBold'), local('MerriweatherSans-ExtraBold'), url(http://fonts.gstatic.com/s/merriweathersans/v5/6LmGj5dOJopQKEkt88Gowf5_oG7m85YQnBYEZ7uTa3L3rGVtsTkPsbDajuO5ueQw.ttf) format('truetype');
+            }
+
+            @font-face {
+                font-family: 'Merriweather Sans';
+                font-style: italic;
+                font-weight: 400;
+                src: local('Merriweather Sans Italic'), local('MerriweatherSans-Italic'), url(http://fonts.gstatic.com/s/merriweathersans/v5/3Mz4hOHzs2npRMG3B1asceaWxmBpCMFP-qWXsrJ7ypI.ttf) format('truetype');
+            }
+
+            @font-face {
+                font-family: 'Merriweather Sans';
+                font-style: italic;
+                font-weight: 800;
+                src: local('Merriweather Sans ExtraBold Italic'), local('MerriweatherSans-ExtraBldItalic'), url(http://fonts.gstatic.com/s/merriweathersans/v5/nAqt4hiqwq3tzCecpgPmVVosbDaPR4DACvxtRnNf0_vr7w4p9aSvGirXi6XmeXNA.ttf) format('truetype');
+            }
+
+            body > *, p {
+                font-family: "Merriweather Sans", sans-serif !important;
+                font-size: 1.3em;
+            }
+
+            div.syntax p {
+                font-size: 2.3em;
+                margin-top: 200px;
+            }
+
+            body {
+                background: #fff;
+                line-height: 2.8em;
+            }
+
+            div.syntaxhighlighter {
+                background: #aaa !important;
+            }
+
+            .syntaxhighlighter code {
+                line-height: 1.5em !important;
+            }
+
+            span.file {
+                font-size: 0.8em;
+                color: #f00;
+                float: right;
+                margin: -.2em .5em 0 0;
+            }
+            h2 {
+                margin-bottom: 12pt;
+            }
+            .smallcode {
+                font-size: 0.8em;
+            }
+
+            strong {
+                color: #662222;
+            }
+            li ul li {
+                list-style-type: circle;
+            }
+
+            li {
+                /*line-height: 1.1em;*/
+                margin-bottom: 0.4em;
+            }
+            h1 {
+                background: #dddddd66;
+                border: solid #bbbbbb 1px;
+                border-radius: 5px;
+                padding: 8px;
+                margin-bottom: 30px;
+            }
+            .footer {
+                margin: 10px 20px 4px 30px;
+                margin-top: 0;
+                width: 95%;
+            }
+            .footerContent {
+                padding: 0.1em 1em 0 0;
+            }
+            h1 {
+                text-align:center;
+            }
+            h2 {
+                line-height: 1.4em;
+            }
+            .cit {
+                margin-top: 50px;
+                font-size: 0.7em;
+                width:100%;
+                text-align:right;
+                line-height: 1.3em;
+            }
+            .difficult-background-dark {
+                color: white;
+                text-shadow: 1px 1px 6px black;
+            }
+            .difficult-background-light {
+                text-shadow: 1px 1px 6px white;
+                background-color: rgba(255,255,255, 0.9);
+            }
+            table.table, .table th, .table td {
+                border: solid 1px;
+                border-collapse: collapse;
+                padding-left: 6px;
+                padding-right: 6px;
+                text-align: right;
+            }
+        </style>
+        <!-- Slippy init code -->
+        <script type="text/javascript">
+            $(function() {
+                $(".slide").slippy({
+                    animLen: 0,
+                    ratio: 1.6
+                });
+                SyntaxHighlighter.all();
+            });
+        </script>
+    </head>
+
+    <body>
+        <div class="slide" style="text-align:center" data-background="elephants1.jpg">
+            <br/><br/>
+            <h2 style="font-size: 3em"  class="difficult-background-dark">Can Postgres cover your NoSQL needs?</h2>
+            <br/><br/>
+            <h3 style="font-style: italic;" class="difficult-background-dark">SymfonyCon, Vienna, Austria - December, 2024</h3>
+            <h3 class="difficult-background-dark" style="font-size: 0.8em">&copy; David Buchmann</h3>
+        </div>
+
+
+        <div class="slide" style="text-align:center" data-background="bern.jpg">
+            <br><br><br><br><br><br>
+            <h2 class="difficult-background-dark">David Buchmann - david@liip.ch</h2>
+
+            <h2 class="difficult-background-dark">PHP Engineer, Liip AG, Switzerland</h2>
+        </div>
+
+        <div class="slide">
+            <h1>What does NoSQL Even Mean?</h1>
+            <ul>
+                <li class="incremental">non-sql
+                <li class="incremental">not only sql
+                <li class="incremental">actually not-relational
+            </ul>
+
+            <p class="incremental">Even Wikipedia only offers a negative definition:<br/> &laquo;A database that focuses on data that is modeled in means other than tabular relations&raquo;</p>
+
+            <!-- nosql is still more of a vague concept (or a buzzword) rather than a technology or standard. -->
+        </div>
+
+        <div class="slide">
+            <h1>What do you want from NoSQL?</h1>
+            <ul>
+                <li>Schemaless, unstructured or semi-structured data<br/>
+                    JSON, XML, key-value or specialized, e.g. graph database
+                <li>Scalability to manage large data sets. <!-- because there are no joins, "sharding" is easy to do, data can be spread horizontally over several servers. -->
+            </ul>
+        </div>
+
+        <div class="slide" data-background="rabbithole.jpg">
+            <h2>Repository</h2>
+            <p>Repository at <a href="https://github.com/dbu/postgres-json/">github.com/dbu/postgres-json</a></p>
+        </div>
+
+        <!--
+        <div class="slide" >
+            <h1>Contents</h1>
+            <ul>
+                <li>Introduction
+                <li>JSON columns
+                <li>JSON querying
+                <li>JSON operations
+                <li>JSON partial updates
+                <li>Doctrine
+                <li>Scaling Postgres
+            </ul>
+        </div>
+-->
+
+
+        <div class="slide" data-background="elephants2.jpg">
+            <br/><br/><br/>
+            <h1>SQL JSON syntax</h1>
+        </div>
+
+
+        <div class="slide">
+            <h2>Define column as JSON</h2>
+            <pre class="brush: plain">
+CREATE TABLE auction_jsonb (
+    id SERIAL NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    current_price INT DEFAULT NULL,
+    item JSONB NOT NULL,
+    PRIMARY KEY(id)
+);
+            </pre>
+            <ul>
+                <li>Higher storage consumption, repeated keys are not optimized.
+                <li>If value occurs more than 1 / 80 rows, column uses less space
+                <li>Querying and joins might be less optimized than for fields
+            </ul>
+            <p style="text-align: right; font-style: italic;margin-top: 40px;"><a href="https://www.heap.io/blog/when-to-avoid-jsonb-in-a-postgresql-schema">heap.io blog</a></p>
+        </div>
+
+        <div class="slide" style="text-align: center">
+            <h2>JSON vs JSONB</h2>
+
+            <table style="text-align: left; margin-top: 80px;">
+                <tr style="font-size: 1.2em;">
+                    <th style="width:50%; padding-bottom: 40px;">JSON: Untyped, stored raw</th>
+                    <th style="width:50%">JSONB: Stored structured</th>
+                </tr>
+                <tr>
+                    <td>
+                        <ul>
+                            <li>Preserve whitespace</li>
+                            <li>Preserve object key order</li>
+                            <li>Can handle invalid JSON, preserve duplicate keys</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Parsed JSON</li>
+                            <li>Faster for querying</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+
+            <p>=&gt; Use JSONB unless you rely on non-standard behaviour.</p>
+        </div>
+
+        <div class="slide syntax">
+            <p>
+                <code>item->'author'</code> = <em>'"David"'</em><br/><br/>
+                or, 2.5 times faster<br/><br/>
+                <code>item->>'author'</code> = <em>'David'</em><br/><br/><br/>
+            </p>
+            <!--
+            string for key, number for array elements
+             -->
+        </div>
+
+        <div class="slide">
+            <h2>JSON data or value?</h2>
+            <table style="margin-top: 80px; width: 100%">
+                <tr>
+                    <td style="width:50%;">
+                        <span style="font-size: 3em">&gt;</span><br/>
+                        The JSON information
+                    </td>
+                    <td style="width:50%;">
+                        <span style="font-size: 3em;">&gt;&gt;</span><br/>
+                        Extract primitive type
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="slide">
+            <h2>Filtering on JSON data</h2>
+            <pre class="brush: plain">
+                SELECT COUNT(*)
+                FROM auction_jsonb
+                WHERE item->>'author' = 'David';
+            </pre>
+            <table class="table">
+                            <tr>
+                                <th>Rows</th>
+                                <th>json</th>
+                                <th>jsonb</th>
+                            </tr>
+                            <tr>
+                                <th>10k</th>
+                                <td>136</td>
+                                <td>31</td>
+                            </tr>
+                            <tr>
+                                <th>100k</th>
+                                <td>319</td>
+                                <td>46</td>
+                            </tr>
+                            <tr>
+                                <th>1M</th>
+                                <td>1'280</td>
+                                <td>157</td>
+                            </tr>
+                            <tr>
+                                <th>10M</th>
+                                <td>15'505</td>
+                                <td>2'768</td>
+                            </tr>
+                        </table>
+            <p style="font-style: italic">Query time in milliseconds</p>
+            <!-- Do not fixate on the milliseconds.
+            The interesting part are the relative differences.
+
+            The actual times can give you some idea of the order of magnitude, but i ran the tests on this laptop here,
+              and you can't have that one for your production, sorry.
+            They depend a lot on your system. On this laptop i noticed postgres is about 30% slower when i unplug it, as it reduces CPU speed to preserve energy.
+            -->
+        </div>
+
+        <div class="slide">
+            <h2>Let's add an index</h2>
+            <pre class="brush: plain">
+                CREATE INDEX json_author
+                ON auction_json_indexed ((item->>'author'));
+            </pre>
+            <table class="table">
+                <tr>
+                    <th>Rows</th>
+                    <th>json</th>
+                    <th>json indexed</th>
+                    <th>jsonb</th>
+                    <th>jsonb indexed</th>
+                </tr>
+                <tr>
+                    <th>10k</th>
+                    <td>136</td>
+                    <td>25</td>
+                    <td>31</td>
+                    <td>20</td>
+                </tr>
+                <tr>
+                    <th>100k</th>
+                    <td>319</td>
+                    <td>12</td>
+                    <td>46</td>
+                    <td>13</td>
+                </tr>
+                <tr>
+                    <th>1M</th>
+                    <td>1'280</td>
+                    <td>3</td>
+                    <td>157</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <th>10M</th>
+                    <td>15'505</td>
+                    <td>7</td>
+                    <td>2'768</td>
+                    <td>6</td>
+                </tr>
+            </table>
+            <p style="font-style: italic">Query time in milliseconds</p>
+            <!--
+            indexes are possible, and they are just as amazing as always.
+            however, they mean you need to know the exact data structure, which means less flexibility.
+             -->
+        </div>
+
+        <div class="slide">
+            <h2>Side note: Tuning the query planner</h2>
+
+            <p>At 10M rows, postgres stopped using the index and went for full table scan</p>
+            <!-- Postgres decided that accessing many random pages from the index would be worse than loading everything -->
+            <pre class="brush: plain">
+                -- Value <= 1.15 makes postgres use the index
+                ALTER TABLESPACE pg_default
+                SET (random_page_cost=1.1);
+            </pre>
+            <p style="text-align: right; font-style: italic;margin-top: 60px; font-size: 1.1em;">Thanks <a href="https://stackoverflow.com/questions/79237899/why-is-postgres-not-using-my-index-on-a-json-column/79239110#79239110">Frank Heikens on stackoverflow</a> for hinting <code>random_page_cost</code></p>
+        </div>
+
+        <div class="slide">
+            <h2>We can also extract a column</h2>
+            <pre class="brush: plain">
+                CREATE TABLE auction_generated_fields (
+                    id SERIAL NOT NULL,
+                    author VARCHAR(255) generated always
+                        as (item->>'author') stored,
+                    item JSONB NOT NULL, PRIMARY KEY(id));
+            </pre>
+            <table class="table">
+                <tr>
+                    <th>Rows</th>
+                    <th>jsonb indexed</th>
+                    <th>generated</th>
+                    <th>generated indexed</th>
+                </tr>
+                <tr>
+                    <th>10k</th>
+                    <td>20</td>
+                    <td>21</td>
+                    <td>18</td>
+                </tr>
+                <tr>
+                    <th>100k</th>
+                    <td>13</td>
+                    <td>30</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <th>1M</th>
+                    <td>3</td>
+                    <td>88</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <th>10M</th>
+                    <td>6</td>
+                    <td>786</td>
+                    <td>4</td>
+                </tr>
+            </table>
+            <p style="font-style: italic">Query time in milliseconds</p>
+            <!-- the query planner did not have problems with the index on a generated field, it used the index even at 10M rows -->
+        </div>
+
+        <div class="slide">
+            <h2>Side note: Extract a date <span style="font-size: 0.8em; padding-left: 30px;">(<a href="https://gist.github.com/jgaskins/41719f1dff8eaf09855dd6af1c247d3b">thanks jamie@zomglol.wtf</a>)</span></h2>
+            <pre class="brush: plain">
+                CREATE FUNCTION text_to_timestamp(text) RETURNS TIMESTAMP
+                LANGUAGE sql IMMUTABLE AS
+                $$
+                SELECT CASE
+                WHEN $1 ~ '^\d{4}-\d{2}-\d{2}[ |T]\d{2}:\d{2}:\d{2}(\.\d+)?(\+00:00)?$'
+                    THEN CAST($1 AS timestamp without time zone)
+                END
+                $$;
+
+                CREATE TABLE auction_generated_fields (
+                    id SERIAL NOT NULL,
+                    start_date TIMESTAMP(0) generated always
+                        AS (text_to_timestamp(item->>'startDate')) stored,
+                    item JSONB NOT NULL, PRIMARY KEY(id));
+            </pre>
+
+            <!-- timezones are really tricky in postgres too.
+            value needs to be immutable when generating a column
+            the json date is with timezone, which is mutable because it can be set for a query.
+            i am surprised that postgres does not provide a built-in solution to convert the json date to a timezone-less date.
+            thanks to jamie@zomglol.wtf who explained this to me.
+            -->
+        </div>
+
+        <div class="slide">
+            <h2>Too many similar options</h2>
+            <ul>
+                <li><code>item->type</code></li>
+                <li><code>JSON_QUERY(item, '$.author')</code></li>
+                <li><code>item #> '{type}'</code></li>
+                <li><code>item['type']</code></li>
+            </ul>
+            <p style="margin-top: 60px;">No sharing of indexes.<br/>
+                => Decide which construct you use
+            </p>
+            <!--
+            postgres does not translate equivalent constructs, each needs its own index
+            too many similar options to do the same.
+            -->
+        </div>
+
+
+        <div class="slide" data-background="elephants3.jpg">
+            <br/><br/><br/>
+            <h1>Complex search in JSON</h1>
+        </div>
+
+
+        <div class="slide syntax" style="font-size: 0.8em; ">
+            <p style="margin-top: 0; line-height: 1.3em;">
+                contains<br/>
+                <code>item @> '{"author": "David"}'</code><br/>
+                <br/>
+                key exists<br/>
+                <code>item ? 'author' <br/>
+                    jsonb_exists(item, 'author')</code><br/>
+                <br/>
+                any key exists<br/>
+                <code>item ?| array['author','foo']
+                    jsonb_exists_any(item, array['a..', 'f..']
+                </code><br/><br/>
+                all keys exist<br/>
+                <code>item ?& array['author','title']<br/>
+                jsonb_exists_all(item, array['a..', 'f..']</code><br/><br/>
+            </p>
+        </div>
+
+        <div class="slide">
+            <h2>JSON object contains object (jsonb only)</h2>
+            <pre class="brush: plain">
+                CREATE INDEX auction_json_gin_idx
+                ON auction_jsonb_gin USING GIN (item);
+
+                SELECT COUNT(*)
+                FROM auction_jsonb_gin
+                WHERE item @> '{"author": "David"}';
+            </pre>
+            <table class="table">
+                <tr>
+                    <th>Rows</th>
+                    <th>-&gt;&gt; indexed</th>
+                    <th>@&gt; no index</th>
+                    <th>@&gt; with index</th>
+                    <th>@&gt; with GIN</th>
+                </tr>
+                <tr>
+                    <th>10k</th>
+                    <td>20</td>
+                    <td>5</td>
+                    <td>5</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <th>100k</th>
+                    <td>13</td>
+                    <td>20</td>
+                    <td>19</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <th>1M</th>
+                    <td>3</td>
+                    <td>144</td>
+                    <td>149</td>
+                    <td>13</td>
+                </tr>
+                <tr>
+                    <th>10M</th>
+                    <td>6</td>
+                    <td>1'239</td>
+                    <td>1'235</td>
+                    <td>76  </td>
+                </tr>
+            </table>
+            <p style="font-style: italic">Query time in milliseconds</p>
+            <!--
+            made me discover the GIN, Generalized Inverted Index
+
+            GIN helps for contains query. does not help for # query.
+            -->
+        </div>
+
+        <div class="slide">
+            <h2>Generalized Inverted Index (GIN)</h2>
+            <br/>
+            <p>Speed up arbitrary JSON contains queries, but not other queries</p>
+            </div>
+
+        <div class="slide">
+            <h2>Side note: value distribution</h2>
+            <p>Data distribution of the indexed column makes a huge difference</p>
+            <table class="table">
+                <tr>
+                    <th>Variants</th>
+                    <th>json</th>
+                    <th>json idx</th>
+                    <th>jsonb</th>
+                    <th>jsonb idx</th>
+                    <th>GIN &gt;&gt;</th>
+                    <th>GIN @</th>
+                    <th>gen</th>
+                    <th>gen idx</th>
+                </tr>
+                <tr>
+                    <th>10</th>
+                    <td>12'372</td>
+                    <td>784</td>
+                    <td>1'895</td>
+                    <td>676</td>
+                    <td>1'882</td>
+                    <td>1'364</td>
+                    <td>1'030</td>
+                    <td>44</td>
+                </tr>
+                <tr>
+                    <th>1'000</th>
+                    <td>12'424</td>
+                    <td>6</td>
+                    <td>1'583</td>
+                    <td>6</td>
+                    <td>1'260</td>
+                    <td>58</td>
+                    <td>931</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <th>100'000</th>
+                    <td>13'197</td>
+                    <td>3</td>
+                    <td>1'710</td>
+                    <td>3</td>
+                    <td>1'501</td>
+                    <td>5</td>
+                    <td>838</td>
+                    <td>3</td>
+                </tr>
+            </table>
+            <p style="font-style: italic">Response times in milliseconds, table with 10 million rows</p>
+        </div>
+
+        <div class="slide">
+            <h2>Insert Performance</h2>
+            <p>Jsonb, indexes and generated fields do not come for free</p>
+
+            <!--
+            Scales roughly linear
+            jsonb costs about 40% more than json
+            adding an index costs about 40% more than not adding it
+            generating text columns will increase storage but costs no additional CPU time.
+            note that with the date column with the function, insert times nearly double.
+            GIN becomes quite expensive on large data sets
+
+            No surprises here. Also its all very very fast compared to your application, e.g. Doctrine.
+             -->
+
+                <table class="table">
+                <tr>
+                    <th>Rows</th>
+                    <th>json</th>
+                    <th>json idx</th>
+                    <th>jsonb</th>
+                    <th>jsonb idx</th>
+                    <th>GIN</th>
+                    <th>gen</th>
+                    <th>gen idx</th>
+                </tr>
+                <tr>
+                    <th>10k</th>
+                    <td>60</td>
+                    <td>90</td>
+                    <td>90</td>
+                    <td>120</td>
+                    <td>130</td>
+                    <td>94</td>
+                    <td>143</td>
+                </tr>
+                <tr>
+                    <th>100k</th>
+                    <td>550</td>
+                    <td>740</td>
+                    <td>820</td>
+                    <td>990</td>
+                    <td>2'110</td>
+                    <td>890</td>
+                    <td>1'000</td>
+                </tr>
+                <tr>
+                    <th>1M</th>
+                    <td>5'150</td>
+                    <td>8'500</td>
+                    <td>7'670</td>
+                    <td>11'340</td>
+                    <td>24'000</td>
+                    <td>8'440</td>
+                    <td>11'773</td>
+                </tr>
+                <tr>
+                    <th>10M</th>
+                    <td>55'000</td>
+                    <td>96'000</td>
+                    <td>97'000</td>
+                    <td>115'000</td>
+                    <td>256'000</td>
+                    <td>84'000</td>
+                    <td>116'000</td>
+                </tr>
+            </table>
+
+            <p style="font-style: italic">Inserting dummy rows,     duration in milliseconds</p>
+        </div>
+
+        <div class="slide">
+            <h2>The impact of data size</h2>
+
+            <ul>
+                <li>Postgres processing time scales linear with size of JSON
+                <li>Storage consumption scales linear too (no optimization)
+                <li>With many rows, GIN index becomes larger than the table itself
+            </ul>
+        </div>
+
+        <div class="slide" data-background="elephants4.jpg">
+            <br/><br/><br/>
+            <h1>Update JSON</h1>
+        </div>
+
+
+        <div class="slide">
+            <h2>Partial Update</h2>
+
+            <p>Manipulate JSON instead of replacing it completely</p>
+
+            <pre class="brush: plain">
+                -- update, ignore if not exists
+                UPDATE auction_jsonb
+                SET item = jsonb_set(item, '{author}', '"value"', false)
+                WHERE id=42;
+
+                -- update or create
+                UPDATE auction_jsonb
+                SET item = jsonb_set(item, '{author}', 'value', true)
+                WHERE id=42;
+            </pre>
+            <!--
+             not much faster for smallish JSON data.
+             contrary to my instinct, it takes about the same time if not longer than replacing all data
+             use it as convenience if you easily know what changed
+             it avoids first loading and deserializing the whole object
+            -->
+            <p class="incremental">Postgres is replacing the whole JSON, query is not faster</p>
+        </div>
+
+        <div class="slide">
+            <h2>Delete fields in JSON</h2>
+
+            <pre class="brush: plain">
+                -- delete attribute
+                UPDATE auction_jsonb
+                SET item = item - 'key'
+                WHERE ID=42;
+
+                -- delete attribute alternate
+                UPDATE auction_jsonb
+                SET item = jsonb_set_lax(item, '{author}', null, true, 'delete_key')
+                WHERE ID=42;
+
+                -- delete multiple
+                item - array['key1', 'key2']
+            </pre>
+        </div>
+
+        <div class="slide">
+            <h2>Versatile set_jsonb_lax</h2>
+
+            <table style="margin-top: 40px; margin-bottom: 80px;">
+                <tr>
+                    <td style="padding-right: 40px;">raise_exception</td><td>Fail if value is null</td>
+                </tr>
+                <tr>
+                    <td>use_json_null</td><td>Set JSON field to null (default)</td>
+                </tr>
+                <tr>
+                    <td>delete_key</td><td>Delete the key on null value</td>
+                </tr>
+                <tr>
+                    <td>return_target</td><td>Leave previous value when new is null</td>
+                </tr>
+            </table>
+            <pre class="brush: plain">
+                set_jsonb_lax(item, '{author}', null, true, 'return_target');
+            </pre>
+            <!-- don't get confused with null because field not set and field set to null -->
+        </div>
+
+        <div class="slide">
+            <h2>JSON schema validation</h2>
+            <ul>
+                <li>Needs custom extension<br> (<code>pg_jsonschema</code> / <code>postgres-json-schema</code>)
+                <li>When you serialize PHP models, do you need validation?
+                <li>Validation discards flexibility in favor of reliability
+            </ul>
+
+        </div>
+
+        <div class="slide">
+            <h2>Some other constructs</h2>
+            <ul>
+                <li><code>||</code> concat array / merge objects</li>
+                <!-- merging objects: second wins collisions, no deep merge) -->
+                <li><code>jsonb_build_object('key', 'value', 'k2', 'v2')</code></li>
+                <li>jsonb('{"type":"book", "author": "David"}')</li>
+                <li>jsonb_serialize(item)</li>
+                <li>jsonb_each(item)</li>
+            </ul>
+        </div>
+
+        <div class="slide" style="text-align: center" data-background="elephants6.jpg">
+            <br/><br/><br/>
+            <h1>Doctrine ORM</h1>
+        </div>
+
+        <div class="slide">
+            <h2>Declare column</h2>
+
+            <pre class="brush: php">
+                #[ORM\Column(type: Types::JSON)]
+                private array $item;
+
+                #[ORM\Column(type: Types::JSON, options: ['jsonb' => true])]
+                private array $item;
+            </pre>
+
+            <p>Index can not be defined in Doctrine.<br/>
+                You have to manually add them to the migration.</p>
+
+            <pre class="brush:php">
+                $this->addSql('CREATE INDEX json_author ON auction_json_indexed ((item->>\'author\'))');
+            </pre>
+        </div>
+
+        <div class="slide">
+            <h2>Define a generated field</h2>
+
+            <pre class="brush: php">
+                #[ORM\Column(
+                    length: 255,
+                    nullable: true,
+                    insertable: false,
+                    updatable: false,
+                    columnDefinition: "VARCHAR(255) generated always as (item->>'author') stored",
+                    generated: "ALWAYS"
+                )]
+                private ?string $author = null;
+            </pre>
+
+            <p>Note: the column definition is native SQL, not DQL</p>
+            <!-- would be nice if index attribute also had an indexDefinition field or similar -->
+        </div>
+
+        <div class="slide">
+            <h2>DQL does not support JSON syntax</h2>
+
+            <p>You can create native queries with Doctrine DBAL</p>
+
+            <!--
+            Native queries are not parsed by doctrine, allowing you to use all the syntax postgres supports.
+            But for some situations, DQL and especially the query builder are really nice tools.
+            -->
+
+            <div class="incremental">
+                <p>Or use <code>scienta/doctrine-json-functions</code></p>
+                <pre class="incremental brush: plain">
+# config/packages/doctrine.yaml
+doctrine:
+  orm:
+    dql:
+      string_functions:
+        JSON_GET_TEXT: Scienta\...\Postgresql\JsonGetText
+        JSONB_CONTAINS: Scienta\...\Postgresql\JsonbContains
+
+            </pre>
+                <p>Register boolean functions as string and compare with <code>= true</code></p>
+
+            </div>
+
+            <!--
+            doctrine parser does not allow having arbitrary characters like @>
+            doctrine does not offer to register boolean_functions and the parser does not allow a predicate without a comparison
+            -->
+
+        </div>
+
+        <div class="slide">
+            <h2>-&gt;&gt; as DQL function</h2>
+            <pre class="brush:php">
+            $qb = $this->createQueryBuilder('a');
+            $qb->select('COUNT(a)')
+                // Need to qualify with a. in front of item
+                ->where("JSON_GET_TEXT(a.item, 'author') = :author")
+                ->setParameter('author', $authorName)
+            ;
+
+            return $qb->getQuery()->getSingleScalarResult();
+            </pre>
+        </div>
+
+        <div class="slide">
+            <h2>@&gt; as DQL function</h2>
+            <pre class="brush:php">
+                $qb = $this->createQueryBuilder('a');
+                $connection = $this->getEntityManager()->getConnection();
+                // Could not figure out how to pass author as parameter.
+                // Not sure if escaping is safe,
+                // needs to be verified for direct user input
+                $author = str_replace('"', '\"', $authorName);
+                $author = trim($connection->quote($author), "'");
+                $qb->select('COUNT(a)')
+                    ->where("JSONB_CONTAINS(a.item, '{\"author\": \"$author\"}') = true")
+                ;
+
+                return $qb->getQuery()->getSingleScalarResult();
+            </pre>
+        </div>
+
+        <div class="slide">
+            <h2>Doctrine/PHP Overhead</h2>
+
+            <table class="table">
+                <tr>
+                    <th>Rows</th>
+                    <th>jsonb</th>
+                    <th>dbal</th>
+                    <th>dbal, batch 1k</th>
+                    <th>entities</th>
+                </tr>
+                <tr>
+                    <th>10k</th>
+                    <td>60</td>
+                    <td>4519</td>
+                    <td>163</td>
+                    <td>6290</td>
+                </tr>
+                <tr>
+                    <th>100k</th>
+                    <td>550</td>
+                    <td>49964</td>
+                    <td>1587</td>
+                    <td>53823</td>
+                </tr>
+            </table>
+
+            <ul style="margin-top: 50px;">
+                <li>Unfair: jsonb measurement is unrealistic
+                <li>Prepared DBAL statements not much faster than EM
+                <li>Unless you batch 1'000 inserts together
+                <li>If you insert single elements, it does not matter
+                <li>With entities, best was flush & clear every 5 entities
+            </ul>
+            <!--
+            In everyday operations, the entities add a layer of convenience and stability to work with your data and use e.g. Symfony validation. The overhead is small, compared to web request overheads.
+            If you have to import large batches of data however, it can be worth it to try shortcuts for optimization.
+            Raw performance with batched prepared statements makes that approach viable.
+             -->
+        </div>
+
+        <div class="slide">
+            <h2>MySQL / MariaDB</h2>
+
+            <ul>
+                <li>Many of the functions are the same or there are equivalent
+                <li>SQL:2016 defines JSON functionality on string fields
+                <li>SQL:2023 defines JSON data type and operations
+                <li>MySQL uses a dedicated type for JSON, MariaDB not
+                <li>Operators like -&gt;&gt; are not standard<br>
+                    (MySQL supports them too, not MariaDB)
+            </ul>
+        </div>
+
+        <div class="slide" data-background="elephants8.jpg">
+            <br/><br/><br/>
+            <h1>Conclusions</h1>
+        </div>
+
+        <div class="slide">
+            <ul>
+                <!--
+                * postgres has powerful support of json, both for unstructured data or for nested data with structures
+                * it has its caveats - but so does learning a nosql database
+                * Use jsonb
+                * Put the important data into dedicated columns. Can use a generated column if wanted.
+                * i use jsonb fields to simplify storing nested data that i do not need to query on (or at least not frequently)
+                * Performance depends very much on your data structure.
+                * Don't take things for granted (ever)
+                * you need a fairly large or very specific application until scaling becomes an issue. designing a clean database, tweaking the configuration, crafting your queries well and properly leveraging indexes can get you quite a long way with a relational database.
+                -->
+                <li>Postgres can handle JSON quite well
+                <li>Harder to support Postgres and MySQL with the same code
+                <li>Caveats - but so does learning a NoSQL database
+                <li><em>Use jsonb</em>
+                <li>Essential data better in dedicated columns
+            </ul>
+        </div>
+
+        <div class="slide">
+            <ul>
+                <li>Performance depends a lot on how your data looks<br/>
+                    Test on real or at least realistic data in realistic quantities!
+                <li>Don't take things for granted (ever, with databases)
+                <li><em>If you have less than 10k rows: Do whatever you want</em>
+                <li>Scaling Postgres is possible, but first look into configuration and optimizing queries
+                <li>If you need frequent or complex searches, you could use a dedicated search engine like Elasticsearch or talk with the MongoDB people in the hallways
+            </ul>
+        </div>
+
+        <div class="slide" style="text-align:center" data-background="question.jpg">
+            <br/><br/>
+            <h2 class="difficult-background-dark" style="font-size: 3em">Thank you!</h2>
+            <br/>
+            <h2 class="difficult-background-dark" style="font-size: 1.7em"><a href="https://github.com/dbu/postgres-json/">github.com/dbu/postgres-json</a></h2>
+            <br>
+            <h2 class="difficult-background-dark" style="font-size: 1.7em">Mastodon: @dbu@phpc.social</h2>
+            <h2 class="difficult-background-dark" style="font-size: 1.7em">David Buchmann, Liip AG</h2>
+        </div>
+
+
+        <div class="slide" data-background="elephants7.jpg">
+            <br/><br/><br/>
+            <h1>Scaling/Replicating postgres</h1>
+        </div>
+
+        <div class="slide">
+            <h2>Workarounds</h2>
+            <ul>
+                <li>Optimizing postgres configuration can get you a long way<br/><br>
+
+                <li>Clear out older data, or create a table per time interval to limit growth<br/><br>
+
+                <li>Put unrelated tables into different databases
+                <li>Move those onto separate servers to spread the load
+                <li>Doctrine can work with multiple entity managers
+            </ul>
+        </div>
+
+        <div class="slide">
+            <h2>Read replicas</h2>
+            <ul>
+                <li>Enable hot-standby mode
+                <li>Can be used for read only queries</li>
+                <li>All or nothing: Need to replicate all databases of the server with all their content </li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <h2>Logical replicas</h2>
+
+            <ul>
+                <li>Mirrors queries to replica server
+                <li>Can limit to some tables or even specific rows
+                <li>Or limit which columns of a table (since postgres 15)</li>
+                <li>Can configure replica server to use foreign data wrappers (FDW) to query tables from upstream server
+                <li>Combining these techniques, you can scale postgres horizontally
+            </ul>
+
+            <p style="text-align: right; font-style: italic;margin-top: 60px;">See <a href="https://pgdash.io/blog/horizontally-scaling-postgresql.html">pgdaash.io</a></p>
+        </div>
+
+        <div class="slide syntax">
+            <p style="margin-top: 100px;">
+                <code>json_each(item)</code><br/><br/>
+                <code>jsonb_each(item)</code>
+            </p>
+            <p style="font-size: 1.5em; margin-top: 100px;">
+                SELECT * <br/>
+                FROM jsonb_each<br/>
+                ((SELECT item FROM auction_jsonb WHERE id=1));
+            </p>
+            <!-- table with key and value columns for each top-level property of item -->
+        </div>
+
+
+        <div class="footer">
+            <span class="left"><img src="symfonycon.png"/></span>
+            <span class="right"><img src="liiplogo.png"/></span>
+            <hr class="defloat" />
+        </div>
+
+
+
+    </body>
+</html>
