@@ -1,0 +1,40 @@
+services:
+  php:
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - database
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-localhost}
+    extra_hosts:
+      - host.containers.internal:host-gateway
+    volumes:
+      - ./:/www
+    ports:
+      - target: 80
+        published: 8001
+        protocol: tcp
+
+  ###> doctrine/doctrine-bundle ###
+  database:
+    image: postgres:17.1-alpine3.20
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+###< doctrine/doctrine-bundle ###
+
+volumes:
+
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###
