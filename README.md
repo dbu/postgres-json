@@ -2,7 +2,7 @@
 
 I built this repository to play around with JSON and postgres, as well as trying out Doctrine support for JSON.
 
-The slides of my talk are [in the doc folder](doc/slides.html).
+The slides of my talk are [in the doc folder](doc/).
 
 The repository comes with Docker, setting it up should be as simple as running `make up`.
 
