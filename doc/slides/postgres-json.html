@@ -487,10 +487,10 @@ CREATE TABLE auction_jsonb (
         <div class="slide">
             <h2>Too many similar options</h2>
             <ul>
-                <li><code>item->type</code></li>
+                <li><code>item->author</code></li>
                 <li><code>JSON_QUERY(item, '$.author')</code></li>
-                <li><code>item #> '{type}'</code></li>
-                <li><code>item['type']</code></li>
+                <li><code>item #> '{author}'</code></li>
+                <li><code>item['author']</code></li>
             </ul>
             <p style="margin-top: 60px;">No sharing of indexes.<br/>
                 => Decide which construct you use
@@ -855,7 +855,8 @@ CREATE TABLE auction_jsonb (
                 private ?string $author = null;
             </pre>
 
-            <p>Note: the column definition is native SQL, not DQL</p>
+            <p>Set insertable and updatable to false, prevent doctrine from writing to the field.<br/>
+                Note: the column definition is native SQL, not DQL</p>
             <!-- would be nice if index attribute also had an indexDefinition field or similar -->
         </div>
 
@@ -940,19 +941,19 @@ doctrine:
                     <td>60</td>
                     <td>4519</td>
                     <td>163</td>
-                    <td>6290</td>
+                    <td>6'290</td>
                 </tr>
                 <tr>
                     <th>100k</th>
                     <td>550</td>
-                    <td>49964</td>
-                    <td>1587</td>
-                    <td>53823</td>
+                    <td>49'964</td>
+                    <td>1'587</td>
+                    <td>53'823</td>
                 </tr>
             </table>
 
             <ul style="margin-top: 50px;">
-                <li>Unfair: jsonb measurement is unrealistic
+                <li>jsonb measurement corresponds to a SQL dump that includes data
                 <li>Prepared DBAL statements not much faster than EM
                 <li>Unless you batch 1'000 inserts together
                 <li>If you insert single elements, it does not matter
@@ -961,7 +962,7 @@ doctrine:
             <!--
             In everyday operations, the entities add a layer of convenience and stability to work with your data and use e.g. Symfony validation. The overhead is small, compared to web request overheads.
             If you have to import large batches of data however, it can be worth it to try shortcuts for optimization.
-            Raw performance with batched prepared statements makes that approach viable.
+            With prepared statements that insert a whole batch of rows at once, this approach is viable.
              -->
         </div>
 
@@ -1063,7 +1064,7 @@ doctrine:
                 <li>Combining these techniques, you can scale postgres horizontally
             </ul>
 
-            <p style="text-align: right; font-style: italic;margin-top: 60px;">See <a href="https://pgdash.io/blog/horizontally-scaling-postgresql.html">pgdaash.io</a></p>
+            <p style="text-align: right; font-style: italic;margin-top: 60px;">See <a href="https://pgdash.io/blog/horizontally-scaling-postgresql.html">pgdash.io</a></p>
         </div>
 
         <div class="slide syntax">
