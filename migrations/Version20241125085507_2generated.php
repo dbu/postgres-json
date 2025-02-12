@@ -38,6 +38,10 @@ final class Version20241125085507_2generated extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_F94BA2B195275AB8 ON auction_jsonb_indexed (start_date)');
         $this->addSql('COMMENT ON COLUMN auction_jsonb_indexed.start_date IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN auction_jsonb_indexed.end_date IS \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('CREATE TABLE auction_jsonb_gin (id SERIAL NOT NULL, title VARCHAR(255) NOT NULL, start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, current_price INT DEFAULT NULL, item JSONB NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE INDEX IDX_26ADE6AD95275AB8 ON auction_jsonb_gin (start_date)');
+        $this->addSql('COMMENT ON COLUMN auction_jsonb_gin.start_date IS \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('COMMENT ON COLUMN auction_jsonb_gin.end_date IS \'(DC2Type:datetime_immutable)\'');
     }
 
     public function down(Schema $schema): void
@@ -48,5 +52,6 @@ final class Version20241125085507_2generated extends AbstractMigration
         $this->addSql('DROP TABLE auction_json_indexed');
         $this->addSql('DROP TABLE auction_jsonb');
         $this->addSql('DROP TABLE auction_jsonb_indexed');
+        $this->addSql('DROP TABLE auction_jsonb_gin');
     }
 }

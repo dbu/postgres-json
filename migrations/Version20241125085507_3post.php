@@ -17,9 +17,10 @@ final class Version20241125085507_3post extends AbstractMigration
     public function up(Schema $schema): void
     {
         // indexes on JSON fields can not be defined in Doctrine.
-        // the indexes are not seen by the Doctrine diff tool and are left alone.
+        // the indexes are not seen by the Doctrine SchemaTool and are left alone.
         $this->addSql('CREATE INDEX json_author ON auction_json_indexed ((item->>\'author\'))');
         $this->addSql('CREATE INDEX jsonb_author ON auction_jsonb_indexed ((item->>\'author\'))');
+        // this index is seen by the Doctrine SchemaTool and it tries to revert it.
         $this->addSql('CREATE INDEX auction_json_gin_idx ON auction_jsonb_gin USING GIN (item)');
     }
 
