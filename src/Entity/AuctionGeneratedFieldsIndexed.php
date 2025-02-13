@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use App\Model\ItemType;
-use App\Repository\AuctionJsonbRepository;
+use App\Repository\AuctionJsonRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * Postgres will update those generated columns automatically on insert and update.
  */
-#[ORM\Entity(repositoryClass: AuctionJsonbRepository::class)]
+#[ORM\Entity(repositoryClass: AuctionJsonRepository::class)]
 #[ORM\Index(columns: ['start_date'])]
 #[ORM\Index(columns: ['author'])]
 class AuctionGeneratedFieldsIndexed
@@ -26,7 +26,7 @@ class AuctionGeneratedFieldsIndexed
         length: 255,
         insertable: false,
         updatable: false,
-        columnDefinition: "VARCHAR(255) generated always as (item->>'title') stored NOT NULL",
+        columnDefinition: "VARCHAR(255) generated always as (item->>'$.title') stored NOT NULL",
         generated: "ALWAYS",
     )]
     private string $title;
@@ -34,7 +34,7 @@ class AuctionGeneratedFieldsIndexed
     #[ORM\Column(
         insertable: false,
         updatable: false,
-        columnDefinition: "TIMESTAMP(0) generated always as (text_to_timestamp(item->>'startDate')) stored NOT NULL",
+        columnDefinition: "DATETIME generated always as (item->>'$.startDate') stored NOT NULL",
         generated: "ALWAYS",
     )]
     private \DateTimeImmutable $startDate;
@@ -42,7 +42,7 @@ class AuctionGeneratedFieldsIndexed
     #[ORM\Column(
         insertable: false,
         updatable: false,
-        columnDefinition: "TIMESTAMP(0) generated always as (text_to_timestamp(item->>'endDate')) stored NOT NULL",
+        columnDefinition: "DATETIME generated always as (item->>'$.endDate') stored NOT NULL",
         generated: "ALWAYS",
     )]
     private \DateTimeImmutable $endDate;
@@ -52,7 +52,7 @@ class AuctionGeneratedFieldsIndexed
         nullable: true,
         insertable: false,
         updatable: false,
-        columnDefinition: "VARCHAR(255) generated always as (item->>'author') stored",
+        columnDefinition: "VARCHAR(255) generated always as (item->>'$.author') stored",
         generated: "ALWAYS",
     )]
     private ?string $author = null;
@@ -60,7 +60,7 @@ class AuctionGeneratedFieldsIndexed
     #[ORM\Column(nullable: true)]
     private ?int $currentPrice = null;
 
-    #[ORM\Column(type: Types::JSON, options: ['jsonb' => true])]
+    #[ORM\Column(type: Types::JSON)]
     private array $item;
 
     public function __construct(

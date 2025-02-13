@@ -3,7 +3,7 @@ services:
 ###> doctrine/doctrine-bundle ###
   database:
     ports:
-      - target: 5432
-        published: ${PSQL_PORT:-5432}
+      - target: 3306
+        published: ${MYSQL_PORT:-3306}
         protocol: tcp
 ###< doctrine/doctrine-bundle ###

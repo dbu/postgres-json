@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\AuctionJsonbRepository;
+use App\Repository\AuctionJsonRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * This is less efficient to query.
  */
-#[ORM\Entity(repositoryClass: AuctionJsonbRepository::class)]
+#[ORM\Entity(repositoryClass: AuctionJsonRepository::class)]
 #[ORM\Index(fields: ['startDate'])]
 class AuctionJsonIndexed
 {
