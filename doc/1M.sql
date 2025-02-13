@@ -1,120 +1,76 @@
+SET SESSION cte_max_recursion_depth = 10000000;
+
 TRUNCATE TABLE auction_json;
-ALTER SEQUENCE auction_json_id_seq RESTART;
 INSERT INTO auction_json (title, start_date, end_date, item)
+WITH RECURSIVE cnt AS (
+    SELECT 1 AS v UNION ALL SELECT v + 1 FROM cnt WHERE v < 1000000
+)
 SELECT
-    'Title ' || cnt,
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6)),
-    JSON_BUILD_OBJECT(
+     CONCAT('Title ', cnt.v),
+     DATE_ADD('2024-01-01', INTERVAL cnt.v-1 MINUTE),
+     DATE_ADD('2024-01-01', INTERVAL cnt.v+6 MINUTE),
+     JSON_OBJECT(
             'type', 'book',
-            'genre', 'Genre '||cnt,
-            'author', 'Author ' || cnt % 1000,
-            'title', 'Title ' || cnt,
-            'description', 'Description ' || cnt,
-            'startDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-            'endDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6))
-    )::json
-FROM generate_series(1, 1000000) AS t(cnt);
+            'genre', CONCAT('Genre ', cnt.v),
+            'author', CONCAT('Author ', cnt.v % 1000),
+            'title', CONCAT('Title ', cnt.v),
+            'description', CONCAT('Description ', cnt.v),
+            'startDate', DATE_ADD('2024-01-01', INTERVAL cnt.v-1 MINUTE),
+            'endDate', DATE_ADD('2024-01-01', INTERVAL cnt.v+6 MINUTE)
+           )
+FROM cnt;
 
 TRUNCATE TABLE auction_json_indexed;
-ALTER SEQUENCE auction_json_indexed_id_seq RESTART;
 INSERT INTO auction_json_indexed (title, start_date, end_date, item)
+WITH RECURSIVE cnt AS (
+    SELECT 1 AS v UNION ALL SELECT v + 1 FROM cnt WHERE v < 1000000
+)
 SELECT
-    'Title ' || cnt,
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6)),
-    JSON_BUILD_OBJECT(
+    CONCAT('Title ', cnt.v),
+    DATE_ADD('2024-01-01', INTERVAL cnt.v-1 MINUTE),
+    DATE_ADD('2024-01-01', INTERVAL cnt.v+6 MINUTE),
+    JSON_OBJECT(
             'type', 'book',
-            'genre', 'Genre '||cnt,
-            'author', 'Author ' || cnt % 1000,
-            'title', 'Title ' || cnt,
-            'description', 'Description ' || cnt,
-            'startDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-            'endDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6))
-    )::json
-FROM generate_series(1, 1000000) AS t(cnt);
+            'genre', CONCAT('Genre ', cnt.v),
+            'author', CONCAT('Author ', cnt.v % 1000),
+            'title', CONCAT('Title ', cnt.v),
+            'description', CONCAT('Description ', cnt.v),
+            'startDate', DATE_ADD('2024-01-01', INTERVAL cnt.v-1 MINUTE),
+            'endDate', DATE_ADD('2024-01-01', INTERVAL cnt.v+6 MINUTE )
+    )
+FROM cnt;
 
-TRUNCATE TABLE auction_jsonb;
-ALTER SEQUENCE auction_jsonb_id_seq RESTART;
-INSERT INTO auction_jsonb (title, start_date, end_date, item)
-SELECT
-    'Title ' || cnt,
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6)),
-    JSON_BUILD_OBJECT(
-            'type', 'book',
-            'genre', 'Genre '||cnt,
-            'author', 'Author ' || cnt % 1000,
-            'title', 'Title ' || cnt,
-            'description', 'Description ' || cnt,
-            'startDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-            'endDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6))
-    )::json
-FROM generate_series(1, 1000000) AS t(cnt);
-
-TRUNCATE TABLE auction_jsonb_indexed;
-ALTER SEQUENCE auction_jsonb_indexed_id_seq RESTART;
-INSERT INTO auction_jsonb_indexed (title, start_date, end_date, item)
-SELECT
-    'Title ' || cnt,
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6)),
-    JSON_BUILD_OBJECT(
-            'type', 'book',
-            'genre', 'Genre '||cnt,
-            'author', 'Author ' || cnt % 1000,
-            'title', 'Title ' || cnt,
-            'description', 'Description ' || cnt,
-            'startDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-            'endDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6))
-    )::json
-FROM generate_series(1, 1000000) AS t(cnt);
-
-TRUNCATE TABLE auction_jsonb_gin;
-ALTER SEQUENCE auction_jsonb_gin_id_seq RESTART;
-INSERT INTO auction_jsonb_gin (title, start_date, end_date, item)
-SELECT
-    'Title ' || cnt,
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-    '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6)),
-    JSON_BUILD_OBJECT(
-            'type', 'book',
-            'genre', 'Genre '||cnt,
-            'author', 'Author ' || cnt % 1000,
-            'title', 'Title ' || cnt,
-            'description', 'Description ' || cnt,
-            'startDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-            'endDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6))
-    )::json
-FROM generate_series(1, 1000000) AS t(cnt);
-
--- the additional columns are generated by postgres (and may not be explicitly assigned a value)
+-- the additional columns are generated by mysql (and may not be explicitly assigned a value)
 TRUNCATE TABLE auction_generated_fields;
-ALTER SEQUENCE auction_generated_fields_id_seq RESTART;
 INSERT INTO auction_generated_fields (item)
+WITH RECURSIVE cnt AS (
+    SELECT 1 AS v UNION ALL SELECT v + 1 FROM cnt WHERE v < 1000000
+)
 SELECT
-    JSON_BUILD_OBJECT(
+    JSON_OBJECT(
             'type', 'book',
-            'genre', 'Genre '||cnt,
-            'author', 'Author ' || cnt % 1000,
-            'title', 'Title ' || cnt,
-            'description', 'Description ' || cnt,
-            'startDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-            'endDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6))
-    )::json
-FROM generate_series(1, 1000000) AS t(cnt);
+            'genre', CONCAT('Genre ', cnt.v),
+            'author', CONCAT('Author ', cnt.v % 1000),
+            'title', CONCAT('Title ', cnt.v),
+            'description', CONCAT('Description ', cnt.v),
+            'startDate', DATE_ADD('2024-01-01', INTERVAL cnt.v-1 MINUTE),
+            'endDate', DATE_ADD('2024-01-01', INTERVAL cnt.v+6 MINUTE )
+    )
+FROM cnt;
 
 TRUNCATE TABLE auction_generated_fields_indexed;
-ALTER SEQUENCE auction_generated_fields_indexed_id_seq RESTART;
 INSERT INTO auction_generated_fields_indexed (item)
+WITH RECURSIVE cnt AS (
+    SELECT 1 AS v UNION ALL SELECT v + 1 FROM cnt WHERE v < 1000000
+)
 SELECT
-    JSON_BUILD_OBJECT(
+    JSON_OBJECT(
             'type', 'book',
-            'genre', 'Genre '||cnt,
-            'author', 'Author ' || cnt % 1000,
-            'title', 'Title ' || cnt,
-            'description', 'Description ' || cnt,
-            'startDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt-1)),
-            'endDate', '2024-01-01'::timestamp + (INTERVAL '1 minute' * (cnt+6))
-    )::json
-FROM generate_series(1, 1000000) AS t(cnt);
+            'genre', CONCAT('Genre ', cnt.v),
+            'author', CONCAT('Author ', cnt.v % 1000),
+            'title', CONCAT('Title ', cnt.v),
+            'description', CONCAT('Description ', cnt.v),
+            'startDate', DATE_ADD('2024-01-01', INTERVAL cnt.v-1 MINUTE),
+            'endDate', DATE_ADD('2024-01-01', INTERVAL cnt.v+6 MINUTE )
+    )
+FROM cnt;
