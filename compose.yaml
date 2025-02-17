@@ -19,22 +19,21 @@ services:
 
   ###> doctrine/doctrine-bundle ###
   database:
-    image: postgres:17.1-alpine3.20
+    image: mysql:9.2
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
+      MYSQL_DATABASE: ${MYSQL_DB:-app}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-!ChangeMe!}
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
       timeout: 5s
       retries: 5
       start_period: 60s
     volumes:
-      - database_data:/var/lib/postgresql/data:rw
+      - database_data_mysql:/var/lib/mysql:rw
 ###< doctrine/doctrine-bundle ###
 
 volumes:
 
 ###> doctrine/doctrine-bundle ###
-  database_data:
+  database_data_mysql:
 ###< doctrine/doctrine-bundle ###

@@ -70,4 +70,20 @@ class AuctionJsonRepository extends ServiceEntityRepository implements AuctionIn
     {
         return $this->itemExtractor->extractItem($auction->getItem());
     }
+
+    public function countAuthor(string $authorName): int
+    {
+        $qb = $this->createQueryBuilder('a');
+        $qb->select('COUNT(a)')
+            // Need to qualify with "a." in front of item
+            // ->where("JSON_CONTAINS(a.item, :author, '$.author') = 1")
+            // we need to compare with a JSON fragment, hence the quotes
+            // ->setParameter('author', '"'.$authorName.'"')
+            // alternate way of achieving the comparison
+            ->where("JSON_EXTRACT(a.item, '$.author') = :author")
+            ->setParameter('author', $authorName)
+        ;
+
+        return $qb->getQuery()->getSingleScalarResult();
+    }
 }

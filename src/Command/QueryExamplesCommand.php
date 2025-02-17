@@ -2,8 +2,7 @@
 
 namespace App\Command;
 
-use App\Repository\AuctionJsonbGinRepository;
-use App\Repository\AuctionJsonbRepository;
+use App\Repository\AuctionJsonRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,8 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class QueryExamplesCommand extends Command
 {
     public function __construct(
-        private readonly AuctionJsonbRepository $jsonbRepository,
-        private readonly AuctionJsonbGinRepository $jsonbGinRepository,
+        private readonly AuctionJsonRepository $jsonRepository,
     )
     {
         parent::__construct();
@@ -29,14 +27,9 @@ class QueryExamplesCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $start = hrtime(true);
-        $this->jsonbRepository->countAuthor('Author 1');
+        $io->info($this->jsonRepository->countAuthor('Author 1').' matches');
         $duration = (int)((hrtime(true) - $start) / 1000 / 1000);
-        $io->success("Took $duration milliseconds to query JSONB repository");
-
-        $start = hrtime(true);
-        $this->jsonbGinRepository->countAuthor('Author 1');
-        $duration = (int)((hrtime(true) - $start) / 1000 / 1000);
-        $io->success("Took $duration milliseconds to query repository with GIN");
+        $io->success("Took $duration milliseconds to query JSON repository");
 
         return Command::SUCCESS;
     }
