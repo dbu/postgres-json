@@ -16,29 +16,87 @@ final class Version20241125085507_2generated extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE auction_generated_fields (id SERIAL NOT NULL, title VARCHAR(255) generated always as (item->>\'title\') stored NOT NULL, start_date TIMESTAMP(0) generated always as (text_to_timestamp(item->>\'startDate\')) stored NOT NULL, end_date TIMESTAMP(0) generated always as (text_to_timestamp(item->>\'endDate\')) stored NOT NULL, author VARCHAR(255) generated always as (item->>\'author\') stored, current_price INT DEFAULT NULL, item JSONB NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE auction_generated_fields (
+            id SERIAL NOT NULL,
+            title VARCHAR(255) generated always as (item->>\'title\') stored NOT NULL,
+            start_date TIMESTAMP(0) generated always as (text_to_timestamp(item->>\'startDate\')) stored NOT NULL,
+            end_date TIMESTAMP(0) generated always as (text_to_timestamp(item->>\'endDate\')) stored NOT NULL,
+            author VARCHAR(255) generated always as (item->>\'author\') stored,
+            current_price INT DEFAULT NULL,
+            item JSONB NOT NULL,
+            PRIMARY KEY(id)
+        )');
         $this->addSql('COMMENT ON COLUMN auction_generated_fields.start_date IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN auction_generated_fields.end_date IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE auction_generated_fields_indexed (id SERIAL NOT NULL, title VARCHAR(255) generated always as (item->>\'title\') stored NOT NULL, start_date TIMESTAMP(0) generated always as (text_to_timestamp(item->>\'startDate\')) stored NOT NULL, end_date TIMESTAMP(0) generated always as (text_to_timestamp(item->>\'endDate\')) stored NOT NULL, author VARCHAR(255) generated always as (item->>\'author\') stored, current_price INT DEFAULT NULL, item JSONB NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE auction_generated_fields_indexed (
+            id SERIAL NOT NULL,
+            title VARCHAR(255) generated always as (item->>\'title\') stored NOT NULL,
+            start_date TIMESTAMP(0) generated always as (text_to_timestamp(item->>\'startDate\')) stored NOT NULL,
+            end_date TIMESTAMP(0) generated always as (text_to_timestamp(item->>\'endDate\')) stored NOT NULL,
+            author VARCHAR(255) generated always as (item->>\'author\') stored,
+            current_price INT DEFAULT NULL,
+            item JSONB NOT NULL,
+            PRIMARY KEY(id)
+        )');
         $this->addSql('CREATE INDEX IDX_D638BFC295275AB8 ON auction_generated_fields_indexed (start_date)');
         $this->addSql('CREATE INDEX IDX_D638BFC2BDAFD8C8 ON auction_generated_fields_indexed (author)');
         $this->addSql('COMMENT ON COLUMN auction_generated_fields_indexed.start_date IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN auction_generated_fields_indexed.end_date IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE auction_json (id SERIAL NOT NULL, title VARCHAR(255) NOT NULL, start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, current_price INT DEFAULT NULL, item JSON NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE auction_json (
+            id SERIAL NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            current_price INT DEFAULT NULL,
+            item JSON NOT NULL,
+            PRIMARY KEY(id)
+        )');
         $this->addSql('COMMENT ON COLUMN auction_json.start_date IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN auction_json.end_date IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE auction_json_indexed (id SERIAL NOT NULL, title VARCHAR(255) NOT NULL, start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, current_price INT DEFAULT NULL, item JSON NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE auction_json_indexed (
+            id SERIAL NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            current_price INT DEFAULT NULL,
+            item JSON NOT NULL,
+            PRIMARY KEY(id)
+        )');
         $this->addSql('CREATE INDEX IDX_5BF05BCF95275AB8 ON auction_json_indexed (start_date)');
         $this->addSql('COMMENT ON COLUMN auction_json_indexed.start_date IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN auction_json_indexed.end_date IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE auction_jsonb (id SERIAL NOT NULL, title VARCHAR(255) NOT NULL, start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, current_price INT DEFAULT NULL, item JSONB NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE auction_jsonb (
+            id SERIAL NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            current_price INT DEFAULT NULL,
+            item JSONB NOT NULL,
+            PRIMARY KEY(id)
+        )');
         $this->addSql('COMMENT ON COLUMN auction_jsonb.start_date IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN auction_jsonb.end_date IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE auction_jsonb_indexed (id SERIAL NOT NULL, title VARCHAR(255) NOT NULL, start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, current_price INT DEFAULT NULL, item JSONB NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE auction_jsonb_indexed (
+            id SERIAL NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            current_price INT DEFAULT NULL,
+            item JSONB NOT NULL,
+            PRIMARY KEY(id)
+        )');
         $this->addSql('CREATE INDEX IDX_F94BA2B195275AB8 ON auction_jsonb_indexed (start_date)');
         $this->addSql('COMMENT ON COLUMN auction_jsonb_indexed.start_date IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN auction_jsonb_indexed.end_date IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE auction_jsonb_gin (id SERIAL NOT NULL, title VARCHAR(255) NOT NULL, start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, current_price INT DEFAULT NULL, item JSONB NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE auction_jsonb_gin (
+            id SERIAL NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            current_price INT DEFAULT NULL,
+            item JSONB NOT NULL,
+            PRIMARY KEY(id)
+        )');
         $this->addSql('CREATE INDEX IDX_26ADE6AD95275AB8 ON auction_jsonb_gin (start_date)');
         $this->addSql('COMMENT ON COLUMN auction_jsonb_gin.start_date IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN auction_jsonb_gin.end_date IS \'(DC2Type:datetime_immutable)\'');
