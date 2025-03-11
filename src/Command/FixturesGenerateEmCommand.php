@@ -5,8 +5,6 @@ namespace App\Command;
 use App\Model\Book;
 use App\Repository\AuctionGeneratedFieldsRepository;
 use App\Repository\AuctionInterface;
-use App\Repository\AuctionJsonbGinRepository;
-use App\Repository\AuctionJsonbRepository;
 use App\Repository\AuctionJsonRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -25,8 +23,6 @@ class FixturesGenerateEmCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly AuctionJsonRepository $jsonRepository,
-        private readonly AuctionJsonbRepository $jsonbRepository,
-        private readonly AuctionJsonbGinRepository $jsonbGinRepository,
         private readonly AuctionGeneratedFieldsRepository $generatedFieldsRepository,
         private readonly bool $isDebug,
     ) {
@@ -47,7 +43,6 @@ class FixturesGenerateEmCommand extends Command
             $io->warning('Running in debug mode means we might run out of memory. If that happens, re-run this command with --env=prod');
         }
         $this->jsonRepository->truncate();
-        $this->jsonbRepository->truncate();
         $this->generatedFieldsRepository->truncate();
 
         $amount = $input->getArgument('amount');
@@ -58,16 +53,6 @@ class FixturesGenerateEmCommand extends Command
         $io->success("Generated $amount plain JSON fixtures in $duration milliseconds");
 
         $start = hrtime(true);
-        $this->generateJson($amount, $this->jsonbRepository);
-        $duration = (int) ((hrtime(true) - $start) / 1000 / 1000);
-        $io->success("Generated $amount JSONB fixtures in $duration milliseconds");
-
-        $start = hrtime(true);
-        $this->generateJson($amount, $this->jsonbGinRepository);
-        $duration = (int) ((hrtime(true) - $start) / 1000 / 1000);
-        $io->success("Generated $amount JSONB GIN fixtures in $duration milliseconds");
-
-            $start = hrtime(true);
         $this->generateJson($amount, $this->generatedFieldsRepository);
         $duration = (int) ((hrtime(true) - $start) / 1000 / 1000);
         $io->success("Generated $amount JSON fixtures with generated fields in $duration milliseconds");

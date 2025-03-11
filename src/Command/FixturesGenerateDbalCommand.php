@@ -5,8 +5,6 @@ namespace App\Command;
 use App\Model\Book;
 use App\Repository\AuctionGeneratedFieldsRepository;
 use App\Repository\AuctionInterface;
-use App\Repository\AuctionJsonbGinRepository;
-use App\Repository\AuctionJsonbRepository;
 use App\Repository\AuctionJsonRepository;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,8 +25,6 @@ class FixturesGenerateDbalCommand extends Command
 
     public function __construct(
         private readonly AuctionJsonRepository $jsonRepository,
-        private readonly AuctionJsonbRepository $jsonbRepository,
-        private readonly AuctionJsonbGinRepository $jsonbGinRepository,
         private readonly AuctionGeneratedFieldsRepository $generatedFieldsRepository,
         private readonly bool $isDebug,
     ) {
@@ -51,8 +47,6 @@ class FixturesGenerateDbalCommand extends Command
             $io->warning('Running in debug mode means we might run out of memory. If that happens, re-run this command with --env=prod');
         }
         $this->jsonRepository->truncate();
-        $this->jsonbRepository->truncate();
-        $this->jsonbGinRepository->truncate();
         $this->generatedFieldsRepository->truncate();
 
         $amount = $input->getArgument('amount');
@@ -76,16 +70,6 @@ class FixturesGenerateDbalCommand extends Command
         $this->generateJson($amount, $batchSize, $this->jsonRepository, $io);
         $duration = (int) ((hrtime(true) - $start) / 1000 / 1000);
         $io->success("Generated $amount plain JSON fixtures in $duration milliseconds");
-
-        $start = hrtime(true);
-        $this->generateJson($amount, $batchSize, $this->jsonbRepository, $io);
-        $duration = (int) ((hrtime(true) - $start) / 1000 / 1000);
-        $io->success("Generated $amount JSONB fixtures in $duration milliseconds");
-
-        $start = hrtime(true);
-        $this->generateJson($amount, $batchSize, $this->jsonbGinRepository, $io);
-        $duration = (int) ((hrtime(true) - $start) / 1000 / 1000);
-        $io->success("Generated $amount JSONB GIN fixtures in $duration milliseconds");
 
         $start = hrtime(true);
         $this->generateJson($amount, $batchSize, $this->generatedFieldsRepository, $io);
