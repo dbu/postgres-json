@@ -6,6 +6,7 @@ use App\Entity\AuctionJsonbGin;
 use App\Model\Item;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Statement;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -72,12 +73,11 @@ class AuctionJsonbGinRepository extends ServiceEntityRepository implements Aucti
     public function countAuthor(string $authorName): int
     {
         $qb = $this->createQueryBuilder('a');
-        // Could not figure out how to pass this as parameter.
-        // I hope this is safe enough, would need to be verified for user input.
-        $author = str_replace('"', '\"', $authorName);
-        $author = trim($this->getEntityManager()->getConnection()->quote($author), "'");
         $qb->select('COUNT(a)')
-            ->where("JSONB_CONTAINS(a.item, '{\"author\": \"$author\"}') = true")
+            // A parameter needs to be the whole JSON object
+            ->where("JSONB_CONTAINS(a.item, :criteria) = true")
+            // With the type, Doctrine will encode and escape correctly
+            ->setParameter('criteria', ['author' => $authorName], Types::JSON)
         ;
 
         return $qb->getQuery()->getSingleScalarResult();
