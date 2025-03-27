@@ -75,7 +75,7 @@ class AuctionJsonbGinRepository extends ServiceEntityRepository implements Aucti
         $qb = $this->createQueryBuilder('a');
         $qb->select('COUNT(a)')
             // A parameter needs to be the whole JSON object
-            ->where("JSONB_CONTAINS(a.item, :criteria) = true")
+            ->where('JSONB_CONTAINS(a.item, :criteria) = true')
             // With the type, Doctrine will encode and escape correctly
             ->setParameter('criteria', ['author' => $authorName], Types::JSON)
         ;
