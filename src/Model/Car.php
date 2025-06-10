@@ -12,6 +12,6 @@ class Car extends Item
         public string $brand,
         public int $mileage,
     ) {
-        parent::__construct($title, $description, $startDate, $endDate, ItemType::BOOK);
+        parent::__construct($title, $description, $startDate, $endDate, ItemType::CAR);
     }
 }
